@@ -36,7 +36,7 @@ const init = async () => {
         gasPrice = await updateGasPrice(web3)
     }, 30000)
     setInterval(() => {
-        console.log('Requests last 2 hours:', req)
+        console.log('Requests last 2 hours:', req * 3)
         req = 0
     }, 1000 * 60 * 60 * 2)
 }
