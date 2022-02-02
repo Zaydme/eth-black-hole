@@ -5,7 +5,7 @@ const updateGasPrice = async (web3) => {
                 'Error getting gas price, maybe being rate limited...\nFuck it, will just use 6 lol'
             )
         })) || 6
-    return (newGasPrice / 10 ** 9 + 1).toFixed(0)
+    return parseInt((newGasPrice / 10 ** 9 + 1).toFixed(0))
 }
 
 module.exports = {

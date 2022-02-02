@@ -10,10 +10,11 @@ async function check() {
     for (key of keys) {
         const balance = await web3.eth.getBalance(key.public)
         if (balance > 0) {
+            console.log(`${key.public} has ${balance}`)
             validKeys.push(key)
         }
     }
     console.log(validKeys)
-    fs.writeFileSync('../keys.json', JSON.stringify(validKeys))
+    fs.writeFileSync('./newKeys.json', JSON.stringify(validKeys))
 }
 check()

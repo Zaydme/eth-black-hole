@@ -7,19 +7,27 @@ const { withdrawAllFromKey } = require('./src/worker')
 const web3 = new Web3(new Web3.providers.HttpProvider(process.env.RPC_SERVER))
 let gasPrice = 0
 let req = 0
+const wait = Math.round(1000 / (10000 / (60 * 5))) * 3
+
 const withdrawAllLoop = async () => {
     let i = 0
     while (i < keys.length) {
         withdrawAllFromKey(web3, gasPrice, keys[i])
         i++
         req++
-        await new Promise((resolve) => setTimeout(resolve, 90))
+        await new Promise((resolve) => setTimeout(resolve, wait))
     }
     withdrawAllLoop()
 }
 
 const init = async () => {
     console.log('Starting...')
+    console.log('Keys count:', keys.length)
+    console.log('Wait time (ms):', wait)
+    console.log(
+        'Average requests per 5 minutes: ',
+        Math.round(1000 / wait) * (60 * 5) * 3
+    )
     gasPrice = await updateGasPrice(web3)
     console.log('Got initial gas price: ', gasPrice)
     console.log('Starting withdraw loop...')
