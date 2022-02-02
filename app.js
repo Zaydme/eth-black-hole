@@ -1,5 +1,6 @@
 require('dotenv').config()
 const Web3 = require('web3')
+const io = require('@pm2/io')
 const keys = require('./keys.json')
 const lowPriorityKeys = require('./lowPriorityKeys.json')
 const { updateGasPrice } = require('./src/helpers')
@@ -10,12 +11,37 @@ let gasPrice = 0
 let req = 0
 const wait = Math.round(1000 / ((10000 - 60 * 5 * 3) / (60 * 5))) * 3
 
+/* Metrics */
+const reqsec = io.meter({
+    name: 'req/sec',
+    id: 'app/requests/volume',
+})
+
+const keysCount = io.metric({
+    name: 'Keys count',
+    id: 'app/keys/high/count',
+})
+keysCount.set(keys.length)
+
+const LowPriorityKeysCount = io.metric({
+    name: 'Low priority keys count',
+    id: 'app/keys/low/count',
+})
+LowPriorityKeysCount.set(lowPriorityKeys.length)
+
+const averageGasPrice = io.metric({
+    name: 'Gas price',
+    type: 'histogram',
+    measurement: 'mean',
+})
+
 const withdrawAllLoop = async () => {
     let i = 0
     while (i < keys.length) {
         withdrawAllFromKey(web3, gasPrice, keys[i])
         i++
         req++
+        reqsec.mark()
         await new Promise((resolve) => setTimeout(resolve, wait))
     }
     withdrawAllLoop()
@@ -41,6 +67,7 @@ const init = async () => {
         Math.round(1000 / wait) * (60 * 5) * 3 + 60 * 5 * 3
     )
     gasPrice = await updateGasPrice(web3)
+    averageGasPrice.set(gasPrice)
     console.log('Got initial gas price: ', gasPrice)
     console.log(`Starting withdraw loop with ${keys.length} keys...`)
     withdrawAllLoop()
@@ -50,6 +77,7 @@ const init = async () => {
     lowPriorityWithdrawAllLoop()
     setInterval(async () => {
         gasPrice = await updateGasPrice(web3)
+        averageGasPrice.set(gasPrice)
     }, 30000)
     setInterval(() => {
         console.log('Requests last 2 hours:', req * 3)
