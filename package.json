@@ -12,7 +12,6 @@
   "license": "MIT",
   "dependencies": {
     "@ethereumjs/common": "^2.6.1",
-    "@pm2/io": "^5.0.0",
     "dotenv": "^15.0.0",
     "ethereumjs-tx": "^2.1.2",
     "web3": "^1.7.0"
