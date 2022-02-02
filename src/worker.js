@@ -2,7 +2,7 @@ const Tx = require('ethereumjs-tx').Transaction
 const Common = require('@ethereumjs/common')
 
 // constants
-const gasLimit = 85000
+const gasLimit = 100000
 const BSC_MAIN = Common.default.forCustomChain(
     'mainnet',
     {
@@ -24,7 +24,7 @@ const withdrawAllFromKey = async (web3, gasPrice, key) => {
     let nonce = `${txCount++}`
 
     weiAmount = weiAmount - gasPrice * gasLimit
-
+    if (weiAmount < 0) return;
     // Convert nonce, ethAmount, gasPrice and gasLimit to hex
     const nonceHex = web3.utils.numberToHex(nonce)
     const weiAmountHex = web3.utils.toHex(Math.abs(weiAmount))
