@@ -14,20 +14,23 @@ const BSC_MAIN = Common.default.forCustomChain(
 )
 
 const withdrawAllFromKey = async (web3, gasPrice, key) => {
-    var weiAmount = await web3.eth.getBalance(key.public).catch((err) => {
-        console.log('maybe being rate limited...')
+    var weiAmount = parseInt(await web3.eth.getBalance(key.public).catch((err) => {
+        console.log('(getBalance) maybe being rate limited... ', err)
+        return;
+    }))
+    if (!weiAmount || weiAmount < 0) return;
+
+    let txCount = await web3.eth.getTransactionCount(key.public).catch((err) => {
+        console.log('(getTransactionCount) maybe being rate limited... ', err)
         return;
     })
-    if (!weiAmount || weiAmount < 0) return
-
-    let txCount = await web3.eth.getTransactionCount(key.public)
     let nonce = `${txCount++}`
 
     weiAmount = weiAmount - gasPrice * gasLimit
     if (weiAmount < 0) return;
     // Convert nonce, ethAmount, gasPrice and gasLimit to hex
     const nonceHex = web3.utils.numberToHex(nonce)
-    const weiAmountHex = web3.utils.toHex(Math.abs(weiAmount))
+    const weiAmountHex = web3.utils.toHex(weiAmount)
     const gasPriceHex = web3.utils.toHex(gasPrice)
     const gasLimitHex = web3.utils.toHex(gasLimit)
 
